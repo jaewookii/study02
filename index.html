@@ -7,55 +7,99 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="card">
 
-    <!-- 헤더 -->
+  <!-- 스크린 리더 전용 라이브 영역 (시각적으로 숨김) -->
+  <div id="srAnnounce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="card" role="main">
+
+    <!-- ── 헤더 ── -->
     <div class="header-row">
       <h1 class="title">My Tasks</h1>
       <div class="header-actions">
-        <span id="remainingBadge" class="remaining-badge">0개 남음</span>
-        <button id="themeToggle" class="theme-toggle" title="다크 모드 (Alt+D)">
-          <span class="theme-icon">🌙</span>
+        <span id="remainingBadge" class="remaining-badge" aria-live="polite" aria-label="남은 할 일 개수">0개 남음</span>
+
+        <!-- 내보내기 -->
+        <button id="exportBtn" class="icon-btn" title="JSON으로 내보내기" aria-label="데이터 JSON으로 내보내기">⬇️</button>
+
+        <!-- 가져오기 (hidden file input + trigger button) -->
+        <button id="importBtn" class="icon-btn" title="JSON에서 가져오기" aria-label="데이터 JSON에서 가져오기">⬆️</button>
+        <input type="file" id="importFile" accept=".json" hidden aria-hidden="true">
+
+        <!-- 다크/라이트 토글 -->
+        <button id="themeToggle" class="theme-toggle" title="다크 모드 (Alt+D)" aria-label="테마 전환">
+          <span class="theme-icon" aria-hidden="true">🌙</span>
         </button>
       </div>
     </div>
 
-    <!-- 진행률 대시보드 -->
-    <section class="dashboard">
+    <!-- ── 진행률 대시보드 ── -->
+    <section class="dashboard" aria-label="진행률 대시보드">
       <div class="dash-overall">
         <div class="dash-header">
           <span id="dashText" class="dash-text">0/0 완료 (0%)</span>
-          <span id="dashToday" class="dash-today">오늘 추가 0개</span>
+          <span id="dashToday" class="dash-today" aria-live="polite">오늘 추가 0개</span>
         </div>
-        <div class="progress-track">
+        <!-- role=progressbar + aria-valuenow 는 JS에서 업데이트 -->
+        <div
+          class="progress-track"
+          id="progressTrack"
+          role="progressbar"
+          aria-valuenow="0"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-label="전체 진행률"
+        >
           <div class="progress-bar" id="progressBar" style="width:0%"></div>
         </div>
+        <!-- 완료율에 따른 응원 메시지 -->
+        <p id="encourageMsg" class="encourage-msg" aria-live="polite"></p>
       </div>
-      <div class="dash-cats" id="dashCats"></div>
+
+      <!-- 카테고리별 미니 진행률 -->
+      <div class="dash-cats" id="dashCats" aria-label="카테고리별 진행률"></div>
+
+      <!-- 오늘의 격언 -->
+      <div class="quote-box" id="quoteBox" aria-label="오늘의 격언"></div>
     </section>
 
-    <!-- 필터 + 완료 삭제 -->
+    <!-- ── 필터 + 정렬 + 완료 삭제 ── -->
     <div class="filter-bar">
-      <div class="filter-row" id="filterRow">
-        <button class="filter-btn active" data-filter="all">전체</button>
-        <button class="filter-btn" data-filter="work">업무</button>
-        <button class="filter-btn" data-filter="personal">개인</button>
-        <button class="filter-btn" data-filter="study">공부</button>
+      <div class="filter-row" id="filterRow" role="group" aria-label="카테고리 필터">
+        <button class="filter-btn active" data-filter="all"      aria-pressed="true">전체</button>
+        <button class="filter-btn"        data-filter="work"     aria-pressed="false">업무</button>
+        <button class="filter-btn"        data-filter="personal" aria-pressed="false">개인</button>
+        <button class="filter-btn"        data-filter="study"    aria-pressed="false">공부</button>
       </div>
-      <button id="clearCompletedBtn" class="clear-completed-btn" style="display:none">완료 삭제</button>
+      <div class="filter-bar-right">
+        <select id="sortSelect" class="sort-select" aria-label="정렬 기준 선택">
+          <option value="newest">최신순</option>
+          <option value="oldest">오래된순</option>
+          <option value="category">카테고리순</option>
+          <option value="manual">수동 정렬</option>
+        </select>
+        <button
+          id="clearCompletedBtn"
+          class="clear-completed-btn"
+          style="display:none"
+          aria-label="완료된 항목 모두 삭제"
+        >완료 삭제</button>
+      </div>
     </div>
 
-    <!-- 검색 -->
-    <div class="search-area">
+    <!-- ── 검색 ── -->
+    <div class="search-area" role="search">
       <input
         type="search"
         id="searchInput"
         class="search-input"
         placeholder="🔍  검색..."
+        aria-label="할 일 검색"
+        autocomplete="off"
       >
     </div>
 
-    <!-- 할 일 입력 -->
+    <!-- ── 할 일 입력 ── -->
     <div class="input-area">
       <div class="input-row">
         <input
@@ -64,20 +108,28 @@
           class="task-input"
           placeholder="새 할 일을 입력하세요..."
           maxlength="200"
+          aria-label="새 할 일 내용 입력"
+          autocomplete="off"
         >
-        <select id="categorySelect" class="category-select">
+        <select id="categorySelect" class="category-select" aria-label="카테고리 선택">
           <option value="work">업무</option>
           <option value="personal">개인</option>
           <option value="study">공부</option>
         </select>
-        <button id="addBtn" class="add-btn">추가</button>
+        <button id="addBtn" class="add-btn" aria-label="할 일 추가">추가</button>
       </div>
     </div>
 
-    <ul id="taskList" class="task-list"></ul>
+    <!-- ── 할 일 목록 ── -->
+    <ul id="taskList" class="task-list" role="list" aria-label="할 일 목록"></ul>
 
-    <p id="emptyMsg" class="empty-msg"></p>
-  </div>
+    <!-- 빈 상태 메시지 -->
+    <p id="emptyMsg" class="empty-msg" role="status"></p>
+
+  </div><!-- .card -->
+
+  <!-- ── 알림 토스트 (fixed) ── -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>
 
   <script src="script.js"></script>
 </body>
