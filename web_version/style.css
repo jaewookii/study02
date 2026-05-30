@@ -166,6 +166,7 @@ body {
 .sidebar {
   width: 290px;
   flex-shrink: 0;
+  min-height: 0; /* flex 자식이 컨테이너를 초과하지 않도록 */
   background: var(--sidebar-bg);
   border-right: 1px solid var(--sidebar-border);
   overflow-y: auto;
@@ -297,11 +298,18 @@ body {
   transition: color 0.3s;
 }
 
+/* 격언을 사이드바 하단으로 밀어내는 스페이서
+   display:none인 quote-box는 flex에서 제외되므로
+   margin-top:auto 대신 항상 존재하는 별도 요소로 처리 */
+.sidebar-spacer {
+  flex: 1;
+  min-height: 16px; /* 콘텐츠가 꽉 찼을 때 최소 여백 보장 */
+}
+
 /* 오늘의 격언 */
 .quote-box {
   border-top: 1px solid var(--sidebar-border);
   padding-top: 16px;
-  margin-top: auto; /* 사이드바 하단에 밀착 */
   font-size: 12px;
   color: var(--text-muted);
   line-height: 1.65;
