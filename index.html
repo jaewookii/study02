@@ -10,6 +10,20 @@
   <div class="card">
     <h1 class="title">My Tasks</h1>
 
+    <!-- 진행률 대시보드 -->
+    <section class="dashboard">
+      <div class="dash-overall">
+        <div class="dash-header">
+          <span id="dashText" class="dash-text">0/0 완료 (0%)</span>
+          <span id="dashToday" class="dash-today">오늘 추가 0개</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-bar" id="progressBar" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="dash-cats" id="dashCats"></div>
+    </section>
+
     <!-- 카테고리 필터 -->
     <div class="filter-row" id="filterRow">
       <button class="filter-btn active" data-filter="all">전체</button>
