@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Tasks</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card">
+    <h1 class="title">My Tasks</h1>
+
+    <!-- 카테고리 필터 -->
+    <div class="filter-row" id="filterRow">
+      <button class="filter-btn active" data-filter="all">전체</button>
+      <button class="filter-btn" data-filter="work">업무</button>
+      <button class="filter-btn" data-filter="personal">개인</button>
+      <button class="filter-btn" data-filter="study">공부</button>
+    </div>
+
+    <!-- 할 일 입력 -->
+    <div class="input-area">
+      <div class="input-row">
+        <input
+          type="text"
+          id="taskInput"
+          class="task-input"
+          placeholder="새 할 일을 입력하세요..."
+          maxlength="200"
+        >
+        <select id="categorySelect" class="category-select">
+          <option value="work">업무</option>
+          <option value="personal">개인</option>
+          <option value="study">공부</option>
+        </select>
+        <button id="addBtn" class="add-btn">추가</button>
+      </div>
+    </div>
+
+    <ul id="taskList" class="task-list"></ul>
+
+    <p id="emptyMsg" class="empty-msg">할 일이 없습니다.</p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

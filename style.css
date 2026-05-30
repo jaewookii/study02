@@ -1,0 +1,290 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 16px;
+  background: #f0f2f5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1a1a2e;
+}
+
+.card {
+  width: 100%;
+  max-width: 600px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 36px 32px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #1a1a2e;
+  letter-spacing: -0.5px;
+}
+
+/* ── 필터 버튼 ── */
+.filter-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  height: 34px;
+  padding: 0 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #777;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  border-color: #5c6bc0;
+  color: #5c6bc0;
+}
+
+.filter-btn.active {
+  background: #5c6bc0;
+  border-color: #5c6bc0;
+  color: #fff;
+  font-weight: 600;
+}
+
+.filter-btn[data-filter="work"].active   { background: #4A90E2; border-color: #4A90E2; }
+.filter-btn[data-filter="personal"].active { background: #27AE60; border-color: #27AE60; }
+.filter-btn[data-filter="study"].active  { background: #8E44AD; border-color: #8E44AD; }
+
+.filter-btn[data-filter="work"]:hover   { border-color: #4A90E2; color: #4A90E2; }
+.filter-btn[data-filter="personal"]:hover { border-color: #27AE60; color: #27AE60; }
+.filter-btn[data-filter="study"]:hover  { border-color: #8E44AD; color: #8E44AD; }
+
+/* ── 입력 영역 ── */
+.input-area {
+  margin-bottom: 24px;
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.task-input {
+  flex: 1;
+  height: 46px;
+  padding: 0 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+
+.task-input:focus {
+  border-color: #5c6bc0;
+}
+
+.category-select {
+  height: 46px;
+  padding: 0 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #fff;
+  color: #444;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.category-select:focus {
+  border-color: #5c6bc0;
+}
+
+.add-btn {
+  height: 46px;
+  padding: 0 18px;
+  background: #5c6bc0;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.add-btn:hover  { background: #3f51b5; }
+.add-btn:active { transform: scale(0.97); }
+
+/* ── 할 일 목록 ── */
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #ebebeb;
+  background: #fafafa;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.task-item:hover {
+  background: #f3f4ff;
+  box-shadow: 0 2px 8px rgba(92, 107, 192, 0.08);
+}
+
+.task-item.completed {
+  opacity: 0.65;
+}
+
+.task-checkbox {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #5c6bc0;
+}
+
+/* 카테고리 색상 좌측 바 */
+.task-item::before {
+  content: '';
+  width: 4px;
+  align-self: stretch;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background: #e0e0e0;
+}
+
+.task-item[data-category="work"]::before     { background: #4A90E2; }
+.task-item[data-category="personal"]::before { background: #27AE60; }
+.task-item[data-category="study"]::before    { background: #8E44AD; }
+
+/* 텍스트 + 메타 묶음 */
+.task-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.task-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.task-text {
+  font-size: 15px;
+  line-height: 1.4;
+  word-break: break-word;
+  transition: color 0.2s, text-decoration 0.2s;
+}
+
+.task-item.completed .task-text {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+/* 카테고리 뱃지 */
+.category-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.category-tag.work     { background: #e8f1fb; color: #4A90E2; }
+.category-tag.personal { background: #e3f6ec; color: #27AE60; }
+.category-tag.study    { background: #f3eaf8; color: #8E44AD; }
+
+/* 생성 시간 */
+.task-time {
+  font-size: 12px;
+  color: #bbb;
+}
+
+.delete-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #ccc;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-top: 1px;
+}
+
+.delete-btn:hover {
+  background: #ffe0e0;
+  color: #e53935;
+}
+
+/* 완료 항목 구분선 */
+.completed-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 6px;
+  color: #bbb;
+  font-size: 12px;
+}
+
+.completed-divider::before,
+.completed-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #ebebeb;
+}
+
+/* 빈 메시지 */
+.empty-msg {
+  text-align: center;
+  color: #bbb;
+  font-size: 14px;
+  padding: 24px 0;
+  display: none;
+}
+
+.empty-msg.visible {
+  display: block;
+}
