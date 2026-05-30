@@ -8,7 +8,17 @@
 </head>
 <body>
   <div class="card">
-    <h1 class="title">My Tasks</h1>
+
+    <!-- 헤더 -->
+    <div class="header-row">
+      <h1 class="title">My Tasks</h1>
+      <div class="header-actions">
+        <span id="remainingBadge" class="remaining-badge">0개 남음</span>
+        <button id="themeToggle" class="theme-toggle" title="다크 모드 (Alt+D)">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+    </div>
 
     <!-- 진행률 대시보드 -->
     <section class="dashboard">
@@ -24,12 +34,25 @@
       <div class="dash-cats" id="dashCats"></div>
     </section>
 
-    <!-- 카테고리 필터 -->
-    <div class="filter-row" id="filterRow">
-      <button class="filter-btn active" data-filter="all">전체</button>
-      <button class="filter-btn" data-filter="work">업무</button>
-      <button class="filter-btn" data-filter="personal">개인</button>
-      <button class="filter-btn" data-filter="study">공부</button>
+    <!-- 필터 + 완료 삭제 -->
+    <div class="filter-bar">
+      <div class="filter-row" id="filterRow">
+        <button class="filter-btn active" data-filter="all">전체</button>
+        <button class="filter-btn" data-filter="work">업무</button>
+        <button class="filter-btn" data-filter="personal">개인</button>
+        <button class="filter-btn" data-filter="study">공부</button>
+      </div>
+      <button id="clearCompletedBtn" class="clear-completed-btn" style="display:none">완료 삭제</button>
+    </div>
+
+    <!-- 검색 -->
+    <div class="search-area">
+      <input
+        type="search"
+        id="searchInput"
+        class="search-input"
+        placeholder="🔍  검색..."
+      >
     </div>
 
     <!-- 할 일 입력 -->
@@ -53,7 +76,7 @@
 
     <ul id="taskList" class="task-list"></ul>
 
-    <p id="emptyMsg" class="empty-msg">할 일이 없습니다.</p>
+    <p id="emptyMsg" class="empty-msg"></p>
   </div>
 
   <script src="script.js"></script>

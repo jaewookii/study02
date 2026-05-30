@@ -1,5 +1,6 @@
 const STORAGE_KEY = 'my-tasks';
 const FILTER_KEY  = 'my-tasks-filter';
+const THEME_KEY   = 'my-tasks-theme';
 
 const CATEGORIES = {
   work:     { label: '업무' },
@@ -7,40 +8,56 @@ const CATEGORIES = {
   study:    { label: '공부' },
 };
 
-const taskInput      = document.getElementById('taskInput');
-const categorySelect = document.getElementById('categorySelect');
-const addBtn         = document.getElementById('addBtn');
-const taskList       = document.getElementById('taskList');
-const emptyMsg       = document.getElementById('emptyMsg');
-const filterRow      = document.getElementById('filterRow');
-const progressBar    = document.getElementById('progressBar');
-const dashText       = document.getElementById('dashText');
-const dashToday      = document.getElementById('dashToday');
-const dashCats       = document.getElementById('dashCats');
+// ── DOM refs ──────────────────────────────────────────────────
+const taskInput         = document.getElementById('taskInput');
+const categorySelect    = document.getElementById('categorySelect');
+const addBtn            = document.getElementById('addBtn');
+const taskList          = document.getElementById('taskList');
+const emptyMsg          = document.getElementById('emptyMsg');
+const filterRow         = document.getElementById('filterRow');
+const progressBar       = document.getElementById('progressBar');
+const dashText          = document.getElementById('dashText');
+const dashToday         = document.getElementById('dashToday');
+const dashCats          = document.getElementById('dashCats');
+const themeToggle       = document.getElementById('themeToggle');
+const themeIcon         = document.querySelector('.theme-icon');
+const searchInput       = document.getElementById('searchInput');
+const clearCompletedBtn = document.getElementById('clearCompletedBtn');
+const remainingBadge    = document.getElementById('remainingBadge');
 
-// ids that should animate in on the next renderTasks call
 const pendingEnterIds = new Set();
+let searchQuery = '';
 
 // ── Storage ───────────────────────────────────────────────────
 
 function loadTasks() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
 }
 
 function saveTasks(tasks) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
-function loadFilter() {
-  return localStorage.getItem(FILTER_KEY) || 'all';
+function loadFilter() { return localStorage.getItem(FILTER_KEY) || 'all'; }
+function saveFilter(f) { localStorage.setItem(FILTER_KEY, f); }
+
+function loadTheme() { return localStorage.getItem(THEME_KEY) || 'light'; }
+function saveTheme(t) { localStorage.setItem(THEME_KEY, t); }
+
+// ── Theme ─────────────────────────────────────────────────────
+
+function applyTheme(theme) {
+  const isDark = theme === 'dark';
+  document.body.classList.toggle('dark', isDark);
+  themeIcon.textContent = isDark ? '☀️' : '🌙';
+  themeToggle.title = (isDark ? '라이트 모드' : '다크 모드') + ' (Alt+D)';
 }
 
-function saveFilter(filter) {
-  localStorage.setItem(FILTER_KEY, filter);
+function toggleTheme() {
+  const next = loadTheme() === 'dark' ? 'light' : 'dark';
+  saveTheme(next);
+  applyTheme(next);
 }
 
 // ── Utils ─────────────────────────────────────────────────────
@@ -64,8 +81,7 @@ function relativeTime(isoString) {
 }
 
 function isToday(isoString) {
-  const d = new Date(isoString);
-  const n = new Date();
+  const d = new Date(isoString), n = new Date();
   return d.getFullYear() === n.getFullYear() &&
          d.getMonth()    === n.getMonth()    &&
          d.getDate()     === n.getDate();
@@ -74,16 +90,20 @@ function isToday(isoString) {
 // ── Dashboard ─────────────────────────────────────────────────
 
 function renderDashboard() {
-  const tasks = loadTasks();
-  const total = tasks.length;
-  const done  = tasks.filter(t => t.completed).length;
-  const pct   = total === 0 ? 0 : Math.round((done / total) * 100);
+  const tasks   = loadTasks();
+  const total   = tasks.length;
+  const done    = tasks.filter(t => t.completed).length;
+  const pending = total - done;
+  const pct     = total === 0 ? 0 : Math.round((done / total) * 100);
 
   dashText.textContent    = `${done}/${total} 완료 (${pct}%)`;
   progressBar.style.width = `${pct}%`;
+  remainingBadge.textContent = `${pending}개 남음`;
 
   const todayCount = tasks.filter(t => isToday(t.createdAt)).length;
   dashToday.textContent = `오늘 추가 ${todayCount}개`;
+
+  clearCompletedBtn.style.display = done > 0 ? 'block' : 'none';
 
   dashCats.innerHTML = '';
   Object.entries(CATEGORIES).forEach(([key, { label }]) => {
@@ -113,19 +133,26 @@ function renderDashboard() {
 function renderTasks() {
   const allTasks     = loadTasks();
   const activeFilter = loadFilter();
+  const q            = searchQuery.trim().toLowerCase();
 
-  const filtered = activeFilter === 'all'
+  let filtered = activeFilter === 'all'
     ? allTasks
     : allTasks.filter(t => t.category === activeFilter);
 
-  const byDate  = (a, b) => new Date(b.createdAt) - new Date(a.createdAt);
-  const pending  = filtered.filter(t => !t.completed).sort(byDate);
+  if (q) filtered = filtered.filter(t => t.text.toLowerCase().includes(q));
+
+  const byDate    = (a, b) => new Date(b.createdAt) - new Date(a.createdAt);
+  const pending   = filtered.filter(t => !t.completed).sort(byDate);
   const completed = filtered.filter(t =>  t.completed).sort(byDate);
 
   taskList.innerHTML = '';
 
   if (filtered.length === 0) {
     emptyMsg.classList.add('visible');
+    // Differentiate "empty because of filter/search" vs "truly empty"
+    emptyMsg.innerHTML = (q || activeFilter !== 'all')
+      ? '검색 결과가 없습니다.'
+      : '할 일이 없습니다.<br>새 할 일을 추가해보세요!';
   } else {
     emptyMsg.classList.remove('visible');
     pending.forEach(task => taskList.appendChild(buildItem(task)));
@@ -139,7 +166,6 @@ function renderTasks() {
     }
   }
 
-  // Trigger enter animation for pending ids
   if (pendingEnterIds.size > 0) {
     pendingEnterIds.forEach(id => {
       const el = taskList.querySelector(`[data-id="${id}"]`);
@@ -263,7 +289,18 @@ function updateTask(id, newText, newCategory) {
   render();
 }
 
-// ── Filter Buttons ────────────────────────────────────────────
+// ── Clear Completed ───────────────────────────────────────────
+
+function clearCompleted() {
+  const tasks = loadTasks();
+  const count = tasks.filter(t => t.completed).length;
+  if (count === 0) return;
+  if (!confirm(`완료된 항목 ${count}개를 모두 삭제할까요?`)) return;
+  saveTasks(tasks.filter(t => !t.completed));
+  render();
+}
+
+// ── Filter ────────────────────────────────────────────────────
 
 function syncFilterButtons(activeFilter) {
   filterRow.querySelectorAll('.filter-btn').forEach(btn => {
@@ -271,13 +308,16 @@ function syncFilterButtons(activeFilter) {
   });
 }
 
-filterRow.addEventListener('click', e => {
-  const btn = e.target.closest('.filter-btn');
-  if (!btn) return;
-  const filter = btn.dataset.filter;
+function setFilter(filter) {
   saveFilter(filter);
   syncFilterButtons(filter);
   renderTasks();
+}
+
+filterRow.addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  setFilter(btn.dataset.filter);
 });
 
 // ── CRUD with animation ───────────────────────────────────────
@@ -300,10 +340,9 @@ function addTask() {
 function toggleTask(id) {
   const li = taskList.querySelector(`[data-id="${id}"]`);
   if (li) {
-    // Fade out current position; item will fade in at its new position
-    li.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-    li.style.opacity    = '0';
-    li.style.transform  = 'translateY(6px)';
+    li.style.transition    = 'opacity 0.25s ease, transform 0.25s ease';
+    li.style.opacity       = '0';
+    li.style.transform     = 'translateY(6px)';
     li.style.pointerEvents = 'none';
     const cb = li.querySelector('.task-checkbox');
     if (cb) cb.disabled = true;
@@ -327,13 +366,12 @@ function deleteTask(id) {
     li.style.pointerEvents = 'none';
   }
   setTimeout(() => {
-    const tasks = loadTasks().filter(t => t.id !== id);
-    saveTasks(tasks);
+    saveTasks(loadTasks().filter(t => t.id !== id));
     render();
   }, 240);
 }
 
-// ── Combined render ───────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────
 
 function render() {
   renderTasks();
@@ -343,12 +381,56 @@ function render() {
 // ── Events ────────────────────────────────────────────────────
 
 addBtn.addEventListener('click', addTask);
-taskInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') addTask();
+taskInput.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+
+themeToggle.addEventListener('click', toggleTheme);
+clearCompletedBtn.addEventListener('click', clearCompleted);
+
+searchInput.addEventListener('input', e => {
+  searchQuery = e.target.value;
+  renderTasks();
+});
+
+// 키보드 단축키
+document.addEventListener('keydown', e => {
+  if (!e.altKey) return;
+
+  // 편집 중인 input에서는 단축키 무시
+  const active = document.activeElement;
+  if (active && (active.classList.contains('edit-input') ||
+                 active.classList.contains('edit-category-select'))) return;
+
+  switch (e.key) {
+    case 'n': case 'N':
+      e.preventDefault();
+      taskInput.focus();
+      taskInput.select();
+      break;
+    case '1':
+      e.preventDefault();
+      setFilter('all');
+      break;
+    case '2':
+      e.preventDefault();
+      setFilter('work');
+      break;
+    case '3':
+      e.preventDefault();
+      setFilter('personal');
+      break;
+    case '4':
+      e.preventDefault();
+      setFilter('study');
+      break;
+    case 'd': case 'D':
+      e.preventDefault();
+      toggleTheme();
+      break;
+  }
 });
 
 // ── Init ──────────────────────────────────────────────────────
 
-const initialFilter = loadFilter();
-syncFilterButtons(initialFilter);
+applyTheme(loadTheme());
+syncFilterButtons(loadFilter());
 render();
